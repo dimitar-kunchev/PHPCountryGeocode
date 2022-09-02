@@ -21,7 +21,7 @@ The extension is built around `libgdal` (which you need to install) and requires
 5. `make install`
 6. add to your `php.ini` file the extension like this:
 	`extension=countrygeocode.so`
-7. Configure path to the borders file in your php.init: `countrygeocode.borders=path-to-the-shp-file`. Make sure it is accompanied with its respective `shx` and etc files
+7. Configure path to a borders file in your php.init: `countrygeocode.borders=path-to-the-shp-file`. Make sure it is accompanied with its respective `shx` and etc files. This repository contains all the needed files in a ZIP archive you can extract to a location of your choice
 
 ## Usage
 
