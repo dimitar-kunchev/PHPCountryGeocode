@@ -112,18 +112,6 @@ PHP_MSHUTDOWN_FUNCTION(countrygeocode)
  */
 PHP_RINIT_FUNCTION(countrygeocode)
 {
-	GDALAllRegister();
-
-
-	const char * driverName = "ESRI Shapefile";
-	char * bfn = COUNTRYGEOCODE_G(borders_file_name);
-	if (bfn != NULL) {
-		COUNTRYGEOCODE_G(dataset) = (GDALDataset *)GDALOpenEx(bfn, GDAL_OF_RASTER | GDAL_OF_VECTOR, NULL, NULL, NULL);
-		if (COUNTRYGEOCODE_G(dataset) == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open borders file %s", bfn);
-		}
-	}
-
 	return SUCCESS;
 }
 /* }}} */
@@ -157,27 +145,34 @@ PHP_MINFO_FUNCTION(countrygeocode)
    Return a string with the ISO code of the country where the coordinates lie */
 PHP_FUNCTION(country_geocode)
 {
-	double lat, lng;
-	/*if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "dd", &lat, &lng) == FAILURE) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Parameters parse failed");
+	GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
+	if (dataset == NULL) {
+		// Attempt to load the dataset
+		GDALAllRegister();
+		char * bfn = COUNTRYGEOCODE_G(borders_file_name);
+		if (bfn != NULL) {
+			dataset = (GDALDataset *)GDALOpenEx(bfn, GDAL_OF_RASTER | GDAL_OF_VECTOR, NULL, NULL, NULL);
+			if (dataset == NULL) {
+				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open borders file %s", bfn);
+				RETURN_NULL();
+			}
+			COUNTRYGEOCODE_G(dataset) = dataset;
+		}
+	}
+	if (dataset == NULL) {
+		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No borders file configured or could not be open");
 		RETURN_NULL();
-	}*/
+	}
+
+
+	double lat, lng;
 
 	ZEND_PARSE_PARAMETERS_START(2,2);
 	Z_PARAM_DOUBLE(lat);
 	Z_PARAM_DOUBLE(lng);
 	ZEND_PARSE_PARAMETERS_END();
 
-	//php_error_docref(NULL TSRMLS_CC, E_NOTICE, "Using point %0.7f %0.7f", lat, lng);
-
-	GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
-	if (dataset == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No borders file configured or could not be open");
-		RETURN_NULL();
-	}
-
 	int layersCount = GDALDatasetGetLayerCount(dataset);
-	//printf("Dataset ready, %d layers\n", layersCount);
 	if (layersCount == 0) {
 		//fprintf( stderr, "No layers in dataset\n");
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid borders file - no layers found");
