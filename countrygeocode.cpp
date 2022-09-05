@@ -59,7 +59,7 @@ zend_module_entry countrygeocode_module_entry = {
 	PHP_RSHUTDOWN(countrygeocode),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(countrygeocode),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.1", /* Replace with version number for your extension */
+	"0.2", /* Replace with version number for your extension */
 #endif
 	PHP_MODULE_GLOBALS(countrygeocode),
 	PHP_GINIT(countrygeocode),
@@ -121,10 +121,10 @@ PHP_RINIT_FUNCTION(countrygeocode)
  */
 PHP_RSHUTDOWN_FUNCTION(countrygeocode)
 {
-	GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
+	/*GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
 	if (dataset != NULL) {
 		GDALClose(dataset);
-	}
+	}*/
 	return SUCCESS;
 }
 /* }}} */
@@ -145,20 +145,21 @@ PHP_MINFO_FUNCTION(countrygeocode)
    Return a string with the ISO code of the country where the coordinates lie */
 PHP_FUNCTION(country_geocode)
 {
-	GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
-	if (dataset == NULL) {
+	GDALDataset * dataset = NULL;
+	/*GDALDataset * dataset = COUNTRYGEOCODE_G(dataset);
+	if (dataset == NULL) {*/
 		// Attempt to load the dataset
 		GDALAllRegister();
 		char * bfn = COUNTRYGEOCODE_G(borders_file_name);
 		if (bfn != NULL) {
-			dataset = (GDALDataset *)GDALOpenEx(bfn, GDAL_OF_RASTER | GDAL_OF_VECTOR, NULL, NULL, NULL);
+			dataset = (GDALDataset *)GDALOpenEx(bfn, GDAL_OF_RASTER | GDAL_OF_VECTOR | GDAL_OF_READONLY | GDAL_OF_SHARED, NULL, NULL, NULL);
 			if (dataset == NULL) {
 				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open borders file %s", bfn);
 				RETURN_NULL();
 			}
-			COUNTRYGEOCODE_G(dataset) = dataset;
+			//COUNTRYGEOCODE_G(dataset) = dataset;
 		}
-	}
+	//}
 	if (dataset == NULL) {
 		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No borders file configured or could not be open");
 		RETURN_NULL();
@@ -219,6 +220,7 @@ PHP_FUNCTION(country_geocode)
 
 	OGR_G_DestroyGeometry(searchPoint);
 
+	GDALClose(dataset);
 	RETURN_STRING(returnISOCode);
 
 }

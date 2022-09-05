@@ -32,7 +32,7 @@ PHP_FUNCTION(country_geocode);
 ZEND_BEGIN_MODULE_GLOBALS(countrygeocode)
 	char * borders_file_name;
 
-	GDALDataset * dataset;
+	//GDALDataset * dataset;
 ZEND_END_MODULE_GLOBALS(countrygeocode)
 
 /* In every utility function you add that needs to use variables 
