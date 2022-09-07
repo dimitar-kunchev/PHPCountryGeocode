@@ -59,7 +59,7 @@ zend_module_entry countrygeocode_module_entry = {
 	PHP_RSHUTDOWN(countrygeocode),	/* Replace with NULL if there's nothing to do at request end */
 	PHP_MINFO(countrygeocode),
 #if ZEND_MODULE_API_NO >= 20010901
-	"0.2", /* Replace with version number for your extension */
+	"0.3", /* Replace with version number for your extension */
 #endif
 	PHP_MODULE_GLOBALS(countrygeocode),
 	PHP_GINIT(countrygeocode),
@@ -214,8 +214,14 @@ PHP_FUNCTION(country_geocode)
 			}
 			const char * tmp = OGR_F_GetFieldAsString(feature, fieldIndex);
 			strcpy(returnISOCode, tmp);
+
+
+			OGR_F_Destroy(feature);
+
 			break;
 		}
+
+		OGR_F_Destroy(feature);
 	}
 
 	OGR_G_DestroyGeometry(searchPoint);
