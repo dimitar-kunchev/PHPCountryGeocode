@@ -154,14 +154,14 @@ PHP_FUNCTION(country_geocode)
 		if (bfn != NULL) {
 			dataset = (GDALDataset *)GDALOpenEx(bfn, GDAL_OF_RASTER | GDAL_OF_VECTOR | GDAL_OF_READONLY | GDAL_OF_SHARED, NULL, NULL, NULL);
 			if (dataset == NULL) {
-				php_error_docref(NULL TSRMLS_CC, E_WARNING, "Could not open borders file %s", bfn);
+				php_error_docref(NULL, E_WARNING, "Could not open borders file %s", bfn);
 				RETURN_NULL();
 			}
 			//COUNTRYGEOCODE_G(dataset) = dataset;
 		}
 	//}
 	if (dataset == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "No borders file configured or could not be open");
+		php_error_docref(NULL, E_ERROR, "No borders file configured or could not be open");
 		RETURN_NULL();
 	}
 
@@ -176,13 +176,13 @@ PHP_FUNCTION(country_geocode)
 	int layersCount = GDALDatasetGetLayerCount(dataset);
 	if (layersCount == 0) {
 		//fprintf( stderr, "No layers in dataset\n");
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid borders file - no layers found");
+		php_error_docref(NULL, E_ERROR, "Invalid borders file - no layers found");
 		RETURN_NULL();
 	}
 
 	OGRLayer * layer = (OGRLayer *)GDALDatasetGetLayer(dataset, 0);
 	if (layer == NULL) {
-		php_error_docref(NULL TSRMLS_CC, E_ERROR, "Invalid borders file - could not get layer");
+		php_error_docref(NULL, E_ERROR, "Invalid borders file - could not get layer");
 		RETURN_NULL();
 	}
 
@@ -191,25 +191,26 @@ PHP_FUNCTION(country_geocode)
 	OGRGeometry * searchPoint = (OGRGeometry *)OGR_G_CreateGeometry(wkbPoint);
 	OGR_G_AddPoint_2D(searchPoint, lng, lat);
 
-	char returnISOCode[2];
+	char returnISOCode[3];
+	memset(returnISOCode, 0, 3);
 
 	for (int i = 0; i < featureCount; i ++) {
 		OGRFeature * feature = (OGRFeature *)OGR_L_GetFeature(layer, i);
 		if (feature == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error getting layer feature %d\n", i);
+			php_error_docref(NULL, E_ERROR, "Error getting layer feature %d\n", i);
 			RETURN_NULL();
 		}
 
 		OGRGeometry * geometry = (OGRGeometry *)OGR_F_GetGeometryRef(feature);
 		if (geometry == NULL) {
-			php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error getting layer feature geometry %d\n", i);
+			php_error_docref(NULL, E_ERROR, "Error getting layer feature geometry %d\n", i);
 			RETURN_NULL();
 		}
 
 		if (OGR_G_Contains(geometry, searchPoint)) {
 			int fieldIndex = OGR_F_GetFieldIndex(feature, "ISO2");
 			if (fieldIndex < 0) {
-				php_error_docref(NULL TSRMLS_CC, E_ERROR, "Error getting ISO2 code for matched country");
+				php_error_docref(NULL, E_ERROR, "Error getting ISO2 code for matched country");
 				RETURN_NULL();
 			}
 			const char * tmp = OGR_F_GetFieldAsString(feature, fieldIndex);
