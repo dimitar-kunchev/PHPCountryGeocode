@@ -191,7 +191,7 @@ PHP_FUNCTION(country_geocode)
 	OGRGeometry * searchPoint = (OGRGeometry *)OGR_G_CreateGeometry(wkbPoint);
 	OGR_G_AddPoint_2D(searchPoint, lng, lat);
 
-	char returnISOCode[2];
+	char returnISOCode[3] = {0,0,0};
 
 	for (int i = 0; i < featureCount; i ++) {
 		OGRFeature * feature = (OGRFeature *)OGR_L_GetFeature(layer, i);
